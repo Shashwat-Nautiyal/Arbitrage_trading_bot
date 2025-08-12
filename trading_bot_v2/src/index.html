@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Arbitrage Bot Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header Section -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1>Crypto Arbitrage Bot Dashboard</h1>
+                <div class="current-time" id="currentTime"></div>
+            </div>
+            <div class="header-right">
+                <div class="bot-status">
+                    <span class="status-indicator online" id="botStatus"></span>
+                    <span class="status-text">Bot Running</span>
+                </div>
+                <div class="key-metrics">
+                    <div class="metric">
+                        <span class="metric-value" id="totalOpportunities">156</span>
+                        <span class="metric-label">Opportunities Today</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="profitableOpportunities">23</span>
+                        <span class="metric-label">Profitable</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-value" id="successRate">14.7%</span>
+                        <span class="metric-label">Success Rate</span>
+                    </div>
+                </div>
+                <button class="theme-toggle" id="themeToggle" title="Toggle dark/light theme">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Summary Cards -->
+        <section class="summary-cards">
+            <div class="card summary-card">
+                <div class="card-header">
+                    <h3>Total Opportunities</h3>
+                    <span class="card-period">24h</span>
+                </div>
+                <div class="card-value" id="cardTotalOpportunities">156</div>
+            </div>
+            <div class="card summary-card">
+                <div class="card-header">
+                    <h3>Profitable Opportunities</h3>
+                    <span class="card-period">24h</span>
+                </div>
+                <div class="card-value" id="cardProfitableOpportunities">23</div>
+            </div>
+            <div class="card summary-card">
+                <div class="card-header">
+                    <h3>Total Potential Profit</h3>
+                    <span class="card-period">24h</span>
+                </div>
+                <div class="card-value" id="cardTotalProfit">$47.85</div>
+            </div>
+            <div class="card summary-card">
+                <div class="card-header">
+                    <h3>Best Opportunity</h3>
+                    <span class="card-period">24h</span>
+                </div>
+                <div class="card-value" id="cardBestOpportunity">$5.40</div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- Opportunities Table -->
+                <section class="table-section">
+                    <div class="section-header">
+                        <h2>Recent Arbitrage Opportunities</h2>
+                        <div class="table-controls">
+                            <input type="text" class="form-control search-input" placeholder="Search opportunities..." id="searchInput">
+                            <button class="btn btn--secondary" id="exportBtn">Export CSV</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="opportunities-table" id="opportunitiesTable">
+                            <thead>
+                                <tr>
+                                    <th class="sortable" data-sort="timestamp">Timestamp</th>
+                                    <th class="sortable" data-sort="route">Route</th>
+                                    <th class="sortable" data-sort="pair">Pair</th>
+                                    <th class="sortable" data-sort="buyPrice">Buy Price</th>
+                                    <th class="sortable" data-sort="sellPrice">Sell Price</th>
+                                    <th class="sortable" data-sort="spread">Spread %</th>
+                                    <th class="sortable" data-sort="profit">Est. Profit</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <!-- Table rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Charts Section -->
+                <section class="charts-section">
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h3>WETH/USDC Price Comparison</h3>
+                            <div class="chart-container" style="position: relative; height: 300px;">
+                                <canvas id="priceChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Profit Distribution</h3>
+                            <div class="chart-container" style="position: relative; height: 300px;">
+                                <canvas id="profitChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <!-- Exchange Status Panel -->
+                <section class="exchange-status">
+                    <h3>Exchange Status</h3>
+                    <div class="exchange-list" id="exchangeList">
+                        <!-- Exchange items will be populated by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Settings Panel -->
+                <section class="settings-panel">
+                    <div class="settings-header">
+                        <h3>Settings</h3>
+                        <button class="collapse-toggle" id="settingsToggle">−</button>
+                    </div>
+                    <div class="settings-content" id="settingsContent">
+                        <div class="form-group">
+                            <label class="form-label">Refresh Interval</label>
+                            <select class="form-control" id="refreshInterval">
+                                <option value="5">5 seconds</option>
+                                <option value="10">10 seconds</option>
+                                <option value="30">30 seconds</option>
+                                <option value="60">1 minute</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Profit Threshold ($)</label>
+                            <input type="number" class="form-control" id="profitThreshold" value="0" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Monitored Exchanges</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" checked> Uniswap
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" checked> Sushiswap
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" checked> Quickswap
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="autoRefresh" checked> Auto-refresh
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="soundAlerts" checked> Sound alerts for profitable opportunities
+                            </label>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <div class="footer-left">
+                <span class="last-update">Last update: <span id="lastUpdate"></span></span>
+            </div>
+            <div class="footer-center">
+                <span class="connection-status">
+                    <span class="status-indicator online"></span>
+                    Connected to 3 exchanges
+                </span>
+            </div>
+            <div class="footer-right">
+                <span class="bot-version">ArbitrageBot v2.1.0</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading opportunities...</div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
